@@ -1,0 +1,32 @@
+parameters:
+- name: 'releaseChannel'
+  type: 'string'
+  default: ''
+- name: 'createDistribution'
+  type: 'boolean'
+  default: 'false'
+
+steps:
+
+- task: 'PowerShell@2'
+  condition: and(succeeded(), eq('${{ parameters.createDistribution }}', 'True'))
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    failOnStderr: true
+    ignoreLASTEXITCODE: true
+    script: |
+      $releaseChannel = '${{ parameters.releaseChannel }}'
+      Write-Host $releaseChannel
+
+- task: 'PowerShell@2'
+  condition: and(succeeded(), eq('${{ parameters.createDistribution }}', 'True'), not('${{ parameters.releaseChannel }}'))
+  env:
+    DOTNET_NOLOGO: '1'
+  inputs:
+    targetType: 'inline'
+    pwsh: true
+    failOnStderr: true
+    ignoreLASTEXITCODE: true
+    script: |
+      Write-Host 'Success'

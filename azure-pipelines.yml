@@ -1,0 +1,33 @@
+trigger:
+  batch: 'true'
+  branches:
+    include:
+    - master
+    - publish/*
+    - development/*
+    - release/*
+    - feature/*
+    - bugfix/*
+  tags:
+    include:
+    - publish/*
+    - build/*
+
+stages:
+
+- stage: 'Stage'
+  condition: succeeded()
+  variables:
+  - name: 'releaseChannel'
+    value: 'value'
+  jobs:
+  - job: 'Job'
+    steps:
+
+    - checkout: self
+      persistCredentials: 'true'
+
+    - template: 'template.yml'
+      parameters:
+        createDistribution: true
+        releaseChannel: $(releaseChannel)
