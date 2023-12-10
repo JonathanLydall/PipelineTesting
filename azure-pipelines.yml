@@ -27,4 +27,3 @@ stages:
     - template: 'template.yml'
       parameters:
         createDistribution: true
-        releaseChannel: $(releaseChannel)
