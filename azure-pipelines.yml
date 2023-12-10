@@ -1,32 +1,29 @@
 trigger:
-  batch: 'true'
   branches:
     include:
-    - master
-    - publish/*
-    - development/*
-    - release/*
-    - feature/*
-    - bugfix/*
-  tags:
-    include:
-    - publish/*
-    - build/*
+    - '*'
 
 stages:
 
+- stage: 'preparationStage'
+  jobs:
+  - job: 'job'
+    steps:
+    - task: 'PowerShell@2'
+      name: 'determineVersion'
+      inputs:
+        targetType: 'inline'
+        pwsh: true
+        script: |
+          Write-Host "##vso[task.setvariable variable=releaseChannel;isOutput=true]value"
+
 - stage: 'Stage'
-  condition: succeeded()
   variables:
   - name: 'releaseChannel'
-    value: 'value'
+    value: $[ stageDependencies.preparationStage.job.outputs['determineVersion.releaseChannel'] ]
   jobs:
   - job: 'Job'
     steps:
-
-    - checkout: self
-      persistCredentials: 'true'
-
     - template: 'template.yml'
       parameters:
         createDistribution: true
