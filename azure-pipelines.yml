@@ -1,29 +1,51 @@
+parameters:
+
+- name: 'makeNightlyBuild'
+  displayName: 'Make nightly build'
+  type: 'boolean'
+  default: 'false'
+
 trigger:
+  batch: 'true'
   branches:
     include:
-    - '*'
+    - master
+    - publish/*
+    - development/*
+    - release/*
+    - feature/*
+    - bugfix/*
+  tags:
+    include:
+    - publish/*
+    - build/*
+
+variables:
+  var1: 'jon'
+  var2: $(var1)
 
 stages:
 
-- stage: 'preparationStage'
-  jobs:
-  - job: 'job'
-    steps:
-    - task: 'PowerShell@2'
-      name: 'determineVersion'
-      inputs:
-        targetType: 'inline'
-        pwsh: true
-        script: |
-          Write-Host "##vso[task.setvariable variable=releaseChannel;isOutput=true]value"
-
 - stage: 'Stage'
-  variables:
-  - name: 'releaseChannel'
-    value: $[ stageDependencies.preparationStage.job.outputs['determineVersion.releaseChannel'] ]
+  condition: succeeded()
   jobs:
   - job: 'Job'
     steps:
-    - template: 'template.yml'
-      parameters:
-        createDistribution: true
+
+    - checkout: self
+      persistCredentials: 'true'
+
+    - task: 'PowerShell@2'
+      inputs:
+        targetType: 'inline'
+        pwsh: true
+        failOnStderr: true
+        ignoreLASTEXITCODE: true
+        script: |
+          $var2 = '${{ variables.var2 }}'
+          Write-Host $var2
+
+    # - template: 'template.yml'
+    #   parameters:
+    #     createDistribution: true
+    #     releaseChannel: $(releaseChannel)
